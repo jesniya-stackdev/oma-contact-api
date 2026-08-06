@@ -9,7 +9,7 @@ app.use(express.json());
 
 // Only allow requests from your actual site domain
 app.use(cors({
-  origin: ['http://127.0.0.1:5500/oma-website/contact.html', 'http://localhost:3000'] // add your real domain
+  origin: ['http://127.0.0.1:5500', 'http://localhost:3000'] // add your real domain
 }));
 
 // Prevent spam/abuse — max 5 submissions per IP every 15 minutes
@@ -17,7 +17,7 @@ const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5 });
 app.use('/api/contact', limiter);
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or your provider (SendGrid, Outlook, etc.)
+  service: 'mtp.zoho.com', // or your provider (SendGrid, Outlook, etc.)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -39,7 +39,7 @@ app.post('/api/contact', async (req, res) => {
   try {
     await transporter.sendMail({
       from: `"OMA Website" <${process.env.EMAIL_USER}>`,
-      to: 'concierge@omabusinesshub.ae', // where you want to receive it
+      to: process.env.EMAIL_USER, // where you want to receive it
       replyTo: email,
       subject: `New enquiry from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nService: ${service || 'N/A'}\n\nMessage:\n${message}`
