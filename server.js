@@ -9,7 +9,7 @@ app.use(express.json());
 
 // Only allow requests from your actual site domain
 app.use(cors({
-  origin: ['https://your-oma-domain.com', 'http://localhost:3000'] // add your real domain
+  origin: ['http://127.0.0.1:5500/oma-website/contact.html', 'http://localhost:3000'] // add your real domain
 }));
 
 // Prevent spam/abuse — max 5 submissions per IP every 15 minutes
