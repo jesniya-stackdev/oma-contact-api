@@ -4,12 +4,12 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 
-const app = express();
+const app = express(); 
 app.use(express.json());
 
 // Only allow requests from your actual site domain
 app.use(cors({
-  origin: ['http://127.0.0.1:5500', 'http://localhost:3000'] // add your real domain
+  origin: ['http://127.0.0.1:5500', 'http://localhost:3000','https://jesniya-stackdev.github.io'] // add your real domain
 }));
 
 // Prevent spam/abuse — max 5 submissions per IP every 15 minutes
