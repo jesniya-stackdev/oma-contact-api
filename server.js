@@ -1,37 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 
-const app = express(); 
+const app = express();
 app.use(express.json());
 
 // Only allow requests from your actual site domain
 app.use(cors({
-  origin: ['http://127.0.0.1:5500', 'http://localhost:3000','https://jesniya-stackdev.github.io'] // add your real domain
+  origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'https://jesniya-stackdev.github.io']
 }));
 
 // Prevent spam/abuse — max 5 submissions per IP every 15 minutes
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5 });
 app.use('/api/contact', limiter);
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.zoho.com',   // see note below if this doesn't work
-  port: 587,
-  secure: true,             // true for port 465, false for port 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});    
-transporter.verify((err, success) => {
-  if (err) {
-    console.error('❌ Zoho SMTP connection failed:', err.message);
-  } else {
-    console.log('✅ Zoho SMTP connection verified — ready to send emails.');
-  }
-});
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, service, message } = req.body;
 
@@ -45,13 +28,27 @@ app.post('/api/contact', async (req, res) => {
   }
 
   try {
-    await transporter.sendMail({
-      from: `"OMA Website" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER, // where you want to receive it
-      replyTo: email,
-      subject: `New enquiry from ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nService: ${service || 'N/A'}\n\nMessage:\n${message}`
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM,   // e.g. "OMA Website <onboarding@resend.dev>" or your verified domain address
+        to: process.env.EMAIL_TO,        // the inbox you want enquiries delivered to
+        reply_to: email,
+        subject: `New enquiry from ${name}`,
+        text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nService: ${service || 'N/A'}\n\nMessage:\n${message}`
+      })
     });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      console.error('Resend error:', errData);
+      return res.status(502).json({ error: 'Failed to send. Please try again later.' });
+    }
+
     res.status(200).json({ success: true });
   } catch (err) {
     console.error(err);
