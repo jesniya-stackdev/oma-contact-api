@@ -17,13 +17,21 @@ const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5 });
 app.use('/api/contact', limiter);
 
 const transporter = nodemailer.createTransport({
-  service: 'mtp.zoho.com', // or your provider (SendGrid, Outlook, etc.)
+  host: 'smtp.zoho.com',   // see note below if this doesn't work
+  port: 465,
+  secure: true,             // true for port 465, false for port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
+});    
+transporter.verify((err, success) => {
+  if (err) {
+    console.error('❌ Zoho SMTP connection failed:', err.message);
+  } else {
+    console.log('✅ Zoho SMTP connection verified — ready to send emails.');
+  }
 });
-
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, service, message } = req.body;
 
