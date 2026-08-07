@@ -18,7 +18,7 @@ app.use('/api/contact', limiter);
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.zoho.com',   // see note below if this doesn't work
-  port: 465,
+  port: 587,
   secure: true,             // true for port 465, false for port 587
   auth: {
     user: process.env.EMAIL_USER,
