@@ -8,7 +8,7 @@ app.use(express.json());
 
 // Only allow requests from your actual site domain
 app.use(cors({
-  origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'https://jesniya-stackdev.github.io']
+  origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'https://jesniya-stackdev.github.io','https://oma-business-hub.onrender.com']
 }));
 
 // Prevent spam/abuse — max 5 submissions per IP every 15 minutes
